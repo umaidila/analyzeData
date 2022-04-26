@@ -17,7 +17,7 @@ number_observation_in_period_col = []
 
 row_num = 0
 
-file = pandas.ExcelFile('input.xls')
+file = pandas.ExcelFile('task_1.xls')
 data_excel = file.parse('1. МБЗ')
 number_period_dynamic = [int(item) for item in data_excel['Unnamed: 15'][:12]]
 bottom_border = [int(item) for item in data_excel['Unnamed: 25'][1:39]]
@@ -62,7 +62,7 @@ df1 = pandas.DataFrame({'История болезни': history_disease_col,
                         'Номер периода динамики': period_number_col,
                         'Длина периода динимики': period_length_col,
                         'Число моментов наблюдений в периоде динамики': number_observation_in_period_col})
-df1.to_excel('output.xlsx')
+df1.to_excel('task_2(1).xls')
 
 history_disease_col1 = []
 diseases_col1 = []
@@ -118,4 +118,4 @@ df2 = pandas.DataFrame({'История болезни': history_disease_col1,
                         'Признак': signs_col1,
                         'Время момента наблюдения': observation_moment_number_col1,
                         'Значение момента наблюдения': observation_moment_value_col1, })
-df2.to_excel('output2.xlsx')
+df2.to_excel('task_2(2).xls')
