@@ -23,13 +23,11 @@ class Pair:
 class Border:
     left = 0
     right = -1
-    '''
+
     def __init__(self, left, right):
         self.left = left
         self.right = right
-    '''
-    def __init__(self,right):
-        self.right = right
+
 
 
 class Alternative:
@@ -78,16 +76,29 @@ for i in range(length):
         if sign_index == '1':  # если начали с первого признака, значит создаем новую историю болезни
             history = History_Disease()
 
-        if sign_index == '1' or sign_index == '2': # для бинарного признака
+        if sign_index == '1' or sign_index == '2': # для бинарного признака чпд 1 и еще одно
             sign = Sign()
             # для признака генерируем пять вариантов динамик
             sign.numbers_periods = [Number_periods() for i in range(5)]
 
-            for i1 in range(len(sign.numbers_periods)):
-                while True:
-                    alternative = Alternative()
-                    if i1+1 == 1: # если один период динамики то альтернатива одна
-                        alternative.borders.append(Border(listPairs[len(listPairs)-1].time))
-                        print(alternative.borders[0].right)
-                        break
-                break
+            # сначала для чпд = 1
+            alternative = Alternative()
+            alternative.borders.append(Border(0,listPairs[len(listPairs)-1].time))
+            sign.numbers_periods[0].alternatives.append(alternative)
+            # для другого
+            alternative = Alternative()
+            num = 0 # считаем какое будет ЧПД
+            for j in range(len(listPairs)-1):
+                if listPairs[j].value != listPairs[j+1].value: # если значение меняется, то это новый период динамики
+                    num+=1
+                    alternative.borders.append(Border(listPairs[j].time,listPairs[j+1].time))
+            sign.numbers_periods[num].alternatives.append(alternative)
+
+            history.signs.append(sign)
+
+        if sign_index == '4': # если прошли все признаки, то добавляем в ИБ
+            history_disease.append(history)
+
+
+print(5)
+
