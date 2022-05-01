@@ -76,7 +76,7 @@ listPairs = []
 it = 0  # индекс для отмерения интервалов строк
 
 for i in range(length):
-    # сначала сдвинем индексы
+    # сначала обновим индексы
     history_disease_index = data_excel['История болезни'][i][2] if len(data_excel['История болезни'][i]) == 3 else \
         data_excel['История болезни'][i][-2:]
     disease_index = data_excel['Заболевание'][i][12]
@@ -112,11 +112,11 @@ for i in range(length):
             alternative = Alternative()
             num = 0  # считаем какое будет ЧПД
             listBorders = []
-            for j in range(1, len(listPairs) - 1):
+            for j in range(0, len(listPairs) - 1):
                 if listPairs[j].value != listPairs[j + 1].value:  # если значение меняется, то это новый период динамики
                     num += 1
                     listBorders.append(Border(listPairs[j].time, listPairs[j + 1].time))
-            listBorders.append([Border(0, listPairs[len(listPairs) - 1].time)])
+            listBorders.append(Border(0, listPairs[len(listPairs) - 1].time))
             num += 1
             alternative.borders = listBorders
             sign.numbers_periods[num - 1].alternatives = alternative
@@ -160,8 +160,7 @@ for i in range(length):
                     # проверяем, соответствует ли границы условиям существования
                     for t in indexPointer.pointers:
                         if t >= len(indexShift):  # проверка на выход за массив
-                            indexPointer.step(indexShift)
-                            continue
+                            stopFlag1 = True
 
                     if stopFlag1:
                         stopFlag = indexPointer.step(indexShift)
@@ -171,12 +170,32 @@ for i in range(length):
 
                     for t in indexPointer.pointers:
                         listShift.append(indexShift[t])
+                    '''
                     listShift = [0] + listShift + [len(listPairs) - 1]
                     ## убрать это и сделать отдельную проверку на краевых значениях
+                    # и отдельно обработать момент, когда крайний левый равен 0
 
                     for t1 in range(0, len(listShift) - 2):  # проверка есть ли значения из левого периода в правом
                         for h1 in listValues[listShift[t1]:listShift[t1 + 1] + 1]:
                             if h1 in listValues[listShift[t1 + 1] + 1:listShift[t1 + 2]+1]:
+                                stopFlag1 = True
+                    if stopFlag1:
+                        stopFlag = indexPointer.step(indexShift)
+                        continue
+                    '''
+                    # отдельная проверка на крайней левой границе
+                    listShift = listShift + [len(listPairs) - 1]
+                    for h1 in listValues[0:listShift[0]+1]:
+                        if h1 in listValues[listShift[0]+1:listShift[1]+1]:
+                            stopFlag1 = True
+                    if stopFlag1:
+                        stopFlag = indexPointer.step(indexShift)
+                        continue
+
+                    # проверка на других периодах, если их больше 2
+                    for t1 in range(0, len(listShift) - 2):  # проверка есть ли значения из левого периода в правом
+                        for h1 in listValues[listShift[t1]+1:listShift[t1 + 1] + 1]:
+                            if h1 in listValues[listShift[t1 + 1] + 1:listShift[t1 + 2] + 1]:
                                 stopFlag1 = True
                     if stopFlag1:
                         stopFlag = indexPointer.step(indexShift)
@@ -186,7 +205,7 @@ for i in range(length):
                     alternative = Alternative()
                     listBorders = [Border(listPairs[listShift[t]].time,
                                           listPairs[listShift[t] + 1].time) for t in
-                                   range(1,len(listShift)-1)]
+                                   range(0,len(listShift)-1)]
                     listBorders.append(Border(0,listPairs[len(listPairs)-1].time))
                     alternative.borders = listBorders
                     listAlternatives.append(alternative)
@@ -194,6 +213,8 @@ for i in range(length):
                     stopFlag = indexPointer.step(indexShift)
 
                 sign.numbers_periods[j].alternatives = listAlternatives
+
+            signList.append(sign)
 
         if sign_index == '4':  # если прошли все рассматриваемые признаки, то добавляем в ИБ
             history.signs = signList
